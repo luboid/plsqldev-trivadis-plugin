@@ -5,40 +5,55 @@ namespace TrivadisPLSQLCop
 {
     public partial class SettingsDialog : Form
     {
-        private PlugIn plugIn;
+        private int id;
 
-        public SettingsDialog(PlugIn plugIn)
+        public SettingsDialog(int id, string name)
         {
-            this.plugIn = plugIn;
             InitializeComponent();
-            Text = plugIn.Name;
+            Text = name;
+            this.id = id;
+        }
+
+        public static string GetTrivadisLocation(int id)
+        {
+            return Callbacks.GetPrefAsString(id, "", "TrivadisLocation", @"C:\tvdcc\tvdcc.cmd");
+        }
+
+        public static string GetTrivadisExtensionMap(int id)
+        {
+            return Callbacks.GetPrefAsString(id, "", "TrivadisExtensionMap", "pck|pks,bdy|pkb,spc|pks");
+        }
+
+        public static string GetTrivadisCheck(int id)
+        {
+            return Callbacks.GetPrefAsString(id, "", "TrivadisCheck", "");
+        }
+
+        public static string GetTrivadisSkip(int id)
+        {
+            return Callbacks.GetPrefAsString(id, "", "TrivadisSkip", "");
+        }
+
+        public static bool GetTrivadisRunAfterCompile(int id)
+        {
+            return Callbacks.GetPrefAsBool(id, "", "TrivadisRunAfterCompile", true);
         }
 
         public new bool ShowDialog()
         {
-            textBox1.Text = Callbacks.GetPrefAsString(plugIn.Id, "", "TrivadisLocation", "");
-            if (string.IsNullOrWhiteSpace(textBox1.Text))
-            {
-                Callbacks.SetPrefAsString(plugIn.Id, "", "TrivadisLocation", @"C:\tvdcc\tvdcc.cmd");
-                textBox1.Text = Callbacks.GetPrefAsString(plugIn.Id, "", "TrivadisLocation", "");
-            }
-            textBox2.Text = Callbacks.GetPrefAsString(plugIn.Id, "", "TrivadisExtensionMap", "");
-            if (string.IsNullOrWhiteSpace(textBox2.Text))
-            {
-                Callbacks.SetPrefAsString(plugIn.Id, "", "TrivadisExtensionMap", "pck|pks,bdy|pkb,spc|pks");
-                textBox2.Text = Callbacks.GetPrefAsString(plugIn.Id, "", "TrivadisExtensionMap", "");
-            }
-            textBox3.Text = Callbacks.GetPrefAsString(plugIn.Id, "", "TrivadisCheck", "");
-            textBox4.Text = Callbacks.GetPrefAsString(plugIn.Id, "", "TrivadisSkip", "");
-            checkBox1.Checked = Callbacks.GetPrefAsBool(plugIn.Id, "", "TrivadisRunAfterCompile", true);
+            textBox1.Text = GetTrivadisLocation(id);
+            textBox2.Text = GetTrivadisExtensionMap(id);
+            textBox3.Text = GetTrivadisCheck(id);
+            textBox4.Text = GetTrivadisSkip(id);
+            checkBox1.Checked = GetTrivadisRunAfterCompile(id);
 
             if (base.ShowDialog() == DialogResult.OK)
             {
-                Callbacks.SetPrefAsString(plugIn.Id, "", "TrivadisLocation", textBox1.Text);
-                Callbacks.SetPrefAsString(plugIn.Id, "", "TrivadisExtensionMap", textBox2.Text);
-                Callbacks.SetPrefAsString(plugIn.Id, "", "TrivadisCheck", textBox3.Text);
-                Callbacks.SetPrefAsString(plugIn.Id, "", "TrivadisSkip", textBox4.Text);
-                Callbacks.SetPrefAsBool(plugIn.Id, "", "TrivadisRunAfterCompile", checkBox1.Checked);
+                Callbacks.SetPrefAsString(id, "", "TrivadisLocation", textBox1.Text);
+                Callbacks.SetPrefAsString(id, "", "TrivadisExtensionMap", textBox2.Text);
+                Callbacks.SetPrefAsString(id, "", "TrivadisCheck", textBox3.Text);
+                Callbacks.SetPrefAsString(id, "", "TrivadisSkip", textBox4.Text);
+                Callbacks.SetPrefAsBool(id, "", "TrivadisRunAfterCompile", checkBox1.Checked);
                 return true;
             }
             return false;

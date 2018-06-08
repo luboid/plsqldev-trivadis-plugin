@@ -17,13 +17,12 @@ namespace TrivadisPLSQLCop
         private const int PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX = 5;
         private const int PLUGIN_POPUPMENU_OBJECT_BROWSER_BOTH_INDEX = 6;
 
-        private static PlugIn me;
         private static ConcurrentDictionary<string, string> extesionsMap =
             new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         private static ConcurrentDictionary<string, string> objectTypeExtesions =
             new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-        public int Id { get; set; }
+        public static int Id { get; set; }
         static PlugIn()
         {
             objectTypeExtesions["PACKAGE"] = "pks";
@@ -39,18 +38,10 @@ namespace TrivadisPLSQLCop
         }
 
 
-        private PlugIn(int id)
-        {
-            Id = id;
-        }
-
         [DllExport("IdentifyPlugIn", CallingConvention = CallingConvention.Cdecl)]
         public static string IdentifyPlugIn(int id)
         {
-            if (me == null)
-            {
-                me = new PlugIn(id);
-            }
+            PlugIn.Id = id;
             return PLUGIN_NAME;
         }
 
@@ -69,29 +60,29 @@ namespace TrivadisPLSQLCop
         [DllExport("OnActivate", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
         public static void OnActivate()
         {
-            Callbacks.PlugInSetting(me.Id, "CHARMODE", "UTF8");
+            Callbacks.PlugInSetting(Id, "CHARMODE", "UTF8");
 
             string popupMenuName = "Run " + PLUGIN_NAME;
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_INDEX - 1, "-", "PROGRAMWINDOW");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_INDEX, popupMenuName, "PROGRAMWINDOW");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "PACKAGE");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "PACKAGE");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_BOTH_INDEX, popupMenuName + " (spec && body)", "PACKAGE");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "PACKAGE BODY");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "PACKAGE BODY");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "FUNCTION");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "FUNCTION");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "PROCEDURE");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "PROCEDURE");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "TRIGGER");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "TRIGGER");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "TYPE");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "TYPE");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_BOTH_INDEX, popupMenuName + " (spec && body)", "TYPE");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "TYPE BODY");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "TYPE BODY");
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "VIEW");//separator
-            Callbacks.CreatePopupItem(me.Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "VIEW");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_INDEX - 1, "-", "PROGRAMWINDOW");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_INDEX, popupMenuName, "PROGRAMWINDOW");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "PACKAGE");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "PACKAGE");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_BOTH_INDEX, popupMenuName + " (spec && body)", "PACKAGE");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "PACKAGE BODY");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "PACKAGE BODY");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "FUNCTION");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "FUNCTION");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "PROCEDURE");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "PROCEDURE");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "TRIGGER");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "TRIGGER");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "TYPE");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "TYPE");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_BOTH_INDEX, popupMenuName + " (spec && body)", "TYPE");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "TYPE BODY");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "TYPE BODY");
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX - 1, "-", "VIEW");//separator
+            Callbacks.CreatePopupItem(Id, PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX, popupMenuName, "VIEW");
         }
 
         static string TempDirectory
@@ -134,12 +125,12 @@ namespace TrivadisPLSQLCop
         public static void RunPLSQLCop(string extension, string title)
         {
             string html = Path.Combine(TempDirectory, "result.html");
-            string check = Callbacks.GetPrefAsString(me.Id, "", "TrivadisCheck", "");
-            string skip = Callbacks.GetPrefAsString(me.Id, "", "TrivadisSkip", "");
+            string check = SettingsDialog.GetTrivadisCheck(Id);
+            string skip = SettingsDialog.GetTrivadisSkip(Id);
 
             System.Diagnostics.ProcessStartInfo p = new System.Diagnostics.ProcessStartInfo();
             p.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            p.FileName = Callbacks.GetPrefAsString(me.Id, "", "TrivadisLocation", @"C:\tvdcc\tvdcc.cmd");
+            p.FileName = SettingsDialog.GetTrivadisLocation(Id);
             p.Arguments = string.Format("path=\"{0}\" html=true output=\"{1}\" filter=\"({2})$\" check=\"{3}\" skip=\"{4}\"",
                 ContentDirectory, html, extension, check, skip);
 
@@ -242,7 +233,7 @@ namespace TrivadisPLSQLCop
         [DllExport("AfterExecuteWindow", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
         public static void AfterExecuteWindow(int windowType, int result)
         {
-            if (result != 2 || windowType != 3 || !Callbacks.GetPrefAsBool(me.Id, "", "TrivadisRunAfterCompile", true))
+            if (result != 2 || windowType != 3 || !SettingsDialog.GetTrivadisRunAfterCompile(Id))
             {
                 return;
             }
@@ -256,8 +247,7 @@ namespace TrivadisPLSQLCop
             {
                 if (0 == extesionsMap.Count)
                 {
-                    Callbacks.GetPrefAsString(me.Id, "", "TrivadisExtensionMap", "")
-                        .MapToDictionary(extesionsMap);
+                    SettingsDialog.GetTrivadisExtensionMap(Id).MapToDictionary(extesionsMap);
                 }
                 return extesionsMap;
             }
@@ -269,7 +259,7 @@ namespace TrivadisPLSQLCop
             switch (index)
             {
                 case PLUGIN_MENU_PREFERENCES_INDEX:
-                    SettingsDialog frm = new SettingsDialog(me);
+                    SettingsDialog frm = new SettingsDialog(Id, PLUGIN_NAME);
                     if (frm.ShowDialog())
                     {
                         extesionsMap.Clear();
