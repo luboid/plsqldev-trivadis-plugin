@@ -38,7 +38,12 @@ namespace TrivadisPLSQLCop
 
     delegate void IdeGetPopupObject(out IntPtr objectType, out IntPtr objectOwner, out IntPtr objectName, out IntPtr subObject); //74
 
+    [return: MarshalAs(UnmanagedType.Bool)]
+    delegate bool IdeGetWindowObject(out IntPtr objectType, out IntPtr objectOwner, out IntPtr objectName, out IntPtr subObject); //110
+
     delegate IntPtr IdeGetObjectSource(byte[] objectType, byte[] objectOwner, byte[] objectName); //79
+
+
 
     public class Callbacks
     {
@@ -58,6 +63,7 @@ namespace TrivadisPLSQLCop
         const int CREATE_POPUP_ITEM_CALLBACK = 69;
         const int GET_POPUP_OBJECT_CALLBACK = 74;
         const int GET_OBJECT_SOURCE_CALLBACK = 79;
+        const int GET_WINDOW_OBJECT_CALLBACK = 110;
         //IDE_GetFileData
         static IdeCreateWindow createWindowCallback;
         static IdeSetText setTextCallback;
@@ -75,6 +81,7 @@ namespace TrivadisPLSQLCop
         static IdeCreatePopupItem createPopupItemCallback;
         static IdeGetPopupObject getPopupObjectCallback;
         static IdeGetObjectSource getObjectSourceCallback;
+        static IdeGetWindowObject getWindowObjectCallback;
 
         public static string GetObjectSource(string objectType, string objectOwner, string objectName)
         {
@@ -82,6 +89,20 @@ namespace TrivadisPLSQLCop
                 objectType.ToUTF8ByteArray(),
                 objectOwner.ToUTF8ByteArray(),
                 objectName.ToUTF8ByteArray()).PtrUTF8StrToString();
+        }
+
+        public static bool GetWindowObject(out string objectType, out string objectOwner, out string objectName, out string subObject)
+        {
+            IntPtr objectTypePtr, objectOwnerPtr, objectNamePtr, subObjectPtr;
+
+            var  result = getWindowObjectCallback(out objectTypePtr, out objectOwnerPtr, out objectNamePtr, out subObjectPtr);
+
+            objectType = objectTypePtr.PtrUTF8StrToString();
+            objectOwner = objectOwnerPtr.PtrUTF8StrToString();
+            objectName = objectNamePtr.PtrUTF8StrToString();
+            subObject = subObjectPtr.PtrUTF8StrToString();
+
+            return result;
         }
 
         public static void GetPopupObject(out string objectType, out string objectOwner, out string objectName, out string subObject)
@@ -232,6 +253,9 @@ namespace TrivadisPLSQLCop
                     break;
                 case GET_OBJECT_SOURCE_CALLBACK:
                     getObjectSourceCallback = Marshal.GetDelegateForFunctionPointer<IdeGetObjectSource>(function);
+                    break;
+                case GET_WINDOW_OBJECT_CALLBACK:
+                    getWindowObjectCallback = Marshal.GetDelegateForFunctionPointer<IdeGetWindowObject>(function);
                     break;
 
             }

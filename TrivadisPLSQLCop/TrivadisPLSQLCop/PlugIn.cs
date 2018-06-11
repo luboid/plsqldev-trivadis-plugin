@@ -17,26 +17,7 @@ namespace TrivadisPLSQLCop
         private const int PLUGIN_POPUPMENU_OBJECT_BROWSER_INDEX = 5;
         private const int PLUGIN_POPUPMENU_OBJECT_BROWSER_BOTH_INDEX = 6;
 
-        private static ConcurrentDictionary<string, string> extesionsMap =
-            new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-        private static ConcurrentDictionary<string, string> objectTypeExtesions =
-            new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-
         public static int Id { get; set; }
-        static PlugIn()
-        {
-            objectTypeExtesions["PACKAGE"] = "pks";
-            objectTypeExtesions["PACKAGE BODY"] = "pkb";
-            objectTypeExtesions["FUNCTION"] = "fnc";
-            objectTypeExtesions["PROCEDURE"] = "prc";
-            objectTypeExtesions["TRIGGER"] = "trg";
-            objectTypeExtesions["TYPE"] = "tps";
-            objectTypeExtesions["TYPE BODY"] = "tbp";
-            objectTypeExtesions["VIEW"] = "vw";
-            // .sql, .prc, .fnc, .pks, .pkb, .trg, .vw, .tps, .tbp, .plb, .pls, .rcv, .spc, .typ, .aqt, .aqp, .ctx, .dbl, .tab, .dim,
-            // .snp, .con, .collt, .seq, .syn, .grt, .sp, .spb, .sps.
-        }
-
 
         [DllExport("IdentifyPlugIn", CallingConvention = CallingConvention.Cdecl)]
         public static string IdentifyPlugIn(int id)
@@ -122,7 +103,7 @@ namespace TrivadisPLSQLCop
                 Directory.CreateDirectory(content);
             }
         }
-        public static void RunPLSQLCop(string extension, string title)
+        public static void RunPLSQLCop(string title)
         {
             string html = Path.Combine(TempDirectory, "result.html");
             string check = SettingsDialog.GetTrivadisCheck(Id);
@@ -132,7 +113,7 @@ namespace TrivadisPLSQLCop
             p.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             p.FileName = SettingsDialog.GetTrivadisLocation(Id);
             p.Arguments = string.Format("path=\"{0}\" html=true output=\"{1}\" filter=\"({2})$\" check=\"{3}\" skip=\"{4}\"",
-                ContentDirectory, html, extension, check, skip);
+                ContentDirectory, html, "sql", check, skip);
 
             using (var f = System.Diagnostics.Process.Start(p))
             {
@@ -152,6 +133,18 @@ namespace TrivadisPLSQLCop
         {
             try
             {
+                string objectType, objectOwner, objectName, subObject;
+                if (!Callbacks.GetWindowObject(out objectType, out objectOwner, out objectName, out subObject))
+                {
+                    return;
+                }
+
+                var items = new string[] { "PACKAGE", "PACKAGE BODY", "FUNCTION", "PROCEDURE", "TRIGGER", "TYPE", "TYPE BODY" };
+                if (Array.IndexOf<string>(items, objectType) == -1)
+                {
+                    return;
+                }
+
                 string fileNameWithPath = null;
                 string fileName = null;
                 string fileNameExtension = null;
@@ -176,19 +169,12 @@ namespace TrivadisPLSQLCop
 
                 ClearDirectories();
 
-                string copyTo = Path.Combine(ContentDirectory, fileName);
-                string copyToExtension = fileNameExtension.Replace(".", string.Empty);
-
-                var items = ExtensionMap;
-                if (items.ContainsKey(copyToExtension))
-                {
-                    copyToExtension = items[copyToExtension];
-                    copyTo = Path.ChangeExtension(copyTo, "." + copyToExtension);
-                }
+                string copyTo = Path.Combine(ContentDirectory,
+                    Path.ChangeExtension(fileName, ".sql"));
 
                 Utils.CopyTo(fileNameWithPath, Path.Combine(ContentDirectory, copyTo), Encoding.Default /*new System.Text.UTF8Encoding(false)*/);
 
-                RunPLSQLCop(copyToExtension, fileName);
+                RunPLSQLCop(Path.GetFileNameWithoutExtension(copyTo));
 
             }
             catch (Exception ex)
@@ -217,12 +203,11 @@ namespace TrivadisPLSQLCop
 
                 ClearDirectories();
 
-                string extension = objectTypeExtesions[objectType];
-                string fileName = objectName + "." + extension;
+                string fileName = Path.Combine(ContentDirectory, objectName + ".sql");
 
-                File.WriteAllText(Path.Combine(ContentDirectory, fileName), builder.ToString(), Encoding.Default /*new System.Text.UTF8Encoding(false)*/);
+                File.WriteAllText(fileName, builder.ToString(), Encoding.Default /*new System.Text.UTF8Encoding(false)*/);
 
-                RunPLSQLCop(extension, fileName);
+                RunPLSQLCop(objectName);
             }
             catch (Exception ex)
             {
@@ -241,29 +226,13 @@ namespace TrivadisPLSQLCop
             RunCurrenWindowPLSQLCop();
         }
 
-        static ConcurrentDictionary<string, string> ExtensionMap
-        {
-            get
-            {
-                if (0 == extesionsMap.Count)
-                {
-                    SettingsDialog.GetTrivadisExtensionMap(Id).MapToDictionary(extesionsMap);
-                }
-                return extesionsMap;
-            }
-        }
-
         [DllExport("OnMenuClick", CallingConvention = CallingConvention.Cdecl)]
         public static void OnMenuClick(int index)
         {
             switch (index)
             {
                 case PLUGIN_MENU_PREFERENCES_INDEX:
-                    SettingsDialog frm = new SettingsDialog(Id, PLUGIN_NAME);
-                    if (frm.ShowDialog())
-                    {
-                        extesionsMap.Clear();
-                    }
+                    (new SettingsDialog(Id, PLUGIN_NAME)).ShowDialog();
                     break;
                 case PLUGIN_POPUPMENU_INDEX:
                     RunCurrenWindowPLSQLCop();
